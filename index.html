@@ -1,36 +1,69 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>RAMUK NIWLA</title>
-    <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: black;
-            color: white;
-            font-family: Arial, sans-serif;
-        }
-        #ramuk {
-            font-size: 3em;
-            display: none;
-            animation: blink 0.3s infinite;
-            background: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        @keyframes blink {
-            0%, 50%, 100% { opacity: 1; }
-            25%, 75% { opacity: 0; }
-        }
-        button {
-            font-size: 2em;
-            padding: 20px 40px;
-            cursor: pointer;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RAMUK NIWLA</title>
+  <style>
+    body {
+      background-color: black;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      font-family: Arial, sans-serif;
+      color: white;
+    }
+
+    button {
+      background-color: #333;
+      color: white;
+      border: 2px solid white;
+      border-radius: 8px;
+      padding: 14px 28px;
+      font-size: 20px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    button:hover {
+      background-color: white;
+      color: black;
+    }
+
+    h1 {
+      font-size: 60px;
+      margin-top: 40px;
+      display: none;
+      background: linear-gradient(90deg, red, orange, yellow, green, cyan, blue, violet);
+      background-size: 400%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: rainbow 0.3s linear infinite;
+    }
+
+    @keyframes rainbow {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 100% 50%; }
+    }
+  </style>
 </head>
 <body>
-    <bu
+  <button id="pressButton">Press Me</button>
+  <h1 id="text">RAMUK NIWLA</h1>
+
+  <script>
+    const button = document.getElementById('pressButton');
+    const text = document.getElementById('text');
+
+    button.addEventListener('click', () => {
+      button.style.display = 'none';
+      setTimeout(() => {
+        text.style.display = 'block';
+      }, 300); // 0.3秒延迟
+    });
+  </script>
+</body>
+</html>
