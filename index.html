@@ -1,69 +1,199 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RAMUK NIWLA</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>小游戏合集</title>
   <style>
-    body {
-      background-color: black;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      margin: 0;
-      font-family: Arial, sans-serif;
-      color: white;
-    }
+    :root{--bg:#0f1724;--card:#0b1220;--accent:#06b6d4;--muted:#94a3b8;color-scheme:dark}
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Arial,sans-serif;background:linear-gradient(180deg,#041025 0%, #071426 60%);color:#e6eef6}
+    .wrap{max-width:980px;margin:28px auto;padding:20px}
+    header{display:flex;align-items:center;gap:16px}
+    h1{font-size:20px;margin:0}
+    nav{margin-top:18px;display:flex;gap:8px;flex-wrap:wrap}
+    button.tab{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 12px;border-radius:8px;color:var(--muted);cursor:pointer}
+    button.tab.active{background:linear-gradient(90deg, rgba(6,182,212,0.12), rgba(6,182,212,0.06));border-color:rgba(6,182,212,0.25);color:var(--accent)}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:12px;padding:18px;margin-top:18px;box-shadow:0 6px 18px rgba(2,6,23,0.5)}
+    .game{display:none}
+    .game.active{display:block}
+    footer{margin-top:18px;color:var(--muted);font-size:13px}
 
-    button {
-      background-color: #333;
-      color: white;
-      border: 2px solid white;
-      border-radius: 8px;
-      padding: 14px 28px;
-      font-size: 20px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
+    /* TicTacToe */
+    .ttt-grid{display:grid;grid-template-columns:repeat(3,96px);gap:8px}
+    .ttt-cell{width:96px;height:96px;display:flex;align-items:center;justify-content:center;font-size:42px;background:rgba(255,255,255,0.02);border-radius:8px;cursor:pointer}
 
-    button:hover {
-      background-color: white;
-      color: black;
-    }
+    /* Memory */
+    .mem-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+    .card-item{aspect-ratio:1/1;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:26px;cursor:pointer;user-select:none;background:rgba(255,255,255,0.02)}
+    .flipped{transform:rotateY(0deg);}
 
-    h1 {
-      font-size: 60px;
-      margin-top: 40px;
-      display: none;
-      background: linear-gradient(90deg, red, orange, yellow, green, cyan, blue, violet);
-      background-size: 400%;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      animation: rainbow 0.3s linear infinite;
-    }
+    /* Moving box */
+    #play-area{position:relative;height:220px;background:linear-gradient(180deg,#071426,#031022);border-radius:8px;overflow:hidden}
+    #target{position:absolute;width:64px;height:64px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#06b6d4,#0284c7);cursor:pointer}
 
-    @keyframes rainbow {
-      0% { background-position: 0% 50%; }
-      100% { background-position: 100% 50%; }
-    }
+    /* Responsive */
+    @media (max-width:600px){.ttt-grid{grid-template-columns:repeat(3,64px)}.ttt-cell{width:64px;height:64px;font-size:28px}.card{padding:12px}}
   </style>
 </head>
 <body>
-  <button id="pressButton">Press Me</button>
-  <h1 id="text">RAMUK NIWLA</h1>
+  <div class="wrap">
+    <header>
+      <h1>小游戏合集 — 单文件版</h1>
+      <div style="margin-left:auto;color:var(--muted);font-size:13px">保存为 <code>index.html</code> 并在浏览器打开</div>
+    </header>
+
+    <nav>
+      <button class="tab active" data-game="guess">猜数字</button>
+      <button class="tab" data-game="ttt">井字棋</button>
+      <button class="tab" data-game="memory">记忆翻牌</button>
+      <button class="tab" data-game="clicker">灵敏点击</button>
+    </nav>
+
+    <div class="card">
+      <!-- Guess the number -->
+      <section id="guess" class="game active">
+        <h2>猜数字（1 — 100）</h2>
+        <p>电脑选一个 1 到 100 的整数，尽量在最少次数内猜中。</p>
+        <div style="display:flex;gap:8px;align-items:center;margin:10px 0">
+          <input id="guessInput" type="number" placeholder="输入你的猜测" style="padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit" />
+          <button id="guessBtn" class="tab">猜！</button>
+          <button id="guessReset" class="tab">重置</button>
+        </div>
+        <div id="guessLog" style="color:var(--muted)"></div>
+      </section>
+
+      <!-- Tic Tac Toe -->
+      <section id="ttt" class="game">
+        <h2>井字棋（本地双人）</h2>
+        <p>轮流点击格子，先连成 3 个为胜。</p>
+        <div class="ttt-grid" id="tttGrid"></div>
+        <div style="margin-top:12px;display:flex;gap:8px;align-items:center">
+          <div id="tttStatus" style="color:var(--muted)">当前：玩家 X</div>
+          <button id="tttReset" class="tab">重新开始</button>
+        </div>
+      </section>
+
+      <!-- Memory Match -->
+      <section id="memory" class="game">
+        <h2>记忆翻牌（4x4）</h2>
+        <p>找到所有成对的图标。</p>
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px">
+          <button id="memReset" class="tab">开始/重置</button>
+          <div id="memInfo" style="color:var(--muted)">翻牌次数：0，匹配：0/8</div>
+        </div>
+        <div class="mem-grid" id="memGrid"></div>
+      </section>
+
+      <!-- Clicker / moving box -->
+      <section id="clicker" class="game">
+        <h2>灵敏点击</h2>
+        <p>点击不断移动的方块，得分越高越快。</p>
+        <div id="play-area">
+          <div id="target">点我</div>
+        </div>
+        <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
+          <div id="clickScore" style="color:var(--muted)">得分：0</div>
+          <button id="clickReset" class="tab">重置</button>
+        </div>
+      </section>
+
+    </div>
+
+    <footer>需要新功能或想把游戏整合到真实页面？告诉我你要的样式或再加上一个在线排行榜！</footer>
+  </div>
 
   <script>
-    const button = document.getElementById('pressButton');
-    const text = document.getElementById('text');
+    // ----- 导航 -----
+    document.querySelectorAll('button.tab[data-game]').forEach(b=>b.addEventListener('click', ()=>{
+      document.querySelectorAll('button.tab').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      const g = b.dataset.game;
+      document.querySelectorAll('.game').forEach(s=>s.classList.remove('active'));
+      document.getElementById(g).classList.add('active');
+    }));
 
-    button.addEventListener('click', () => {
-      button.style.display = 'none';
-      setTimeout(() => {
-        text.style.display = 'block';
-      }, 300); // 0.3秒延迟
-    });
+    // ----- 猜数字 -----
+    (function(){
+      let target, attempts;
+      const log = document.getElementById('guessLog');
+      const input = document.getElementById('guessInput');
+      const btn = document.getElementById('guessBtn');
+      const reset = document.getElementById('guessReset');
+      function newGame(){ target = Math.floor(Math.random()*100)+1; attempts=0; log.textContent='已生成新数字，开始猜吧！'; input.value=''; }
+      newGame();
+      btn.addEventListener('click', ()=>{
+        const v = Number(input.value);
+        if(!v){ log.textContent='请输入 1 到 100 的整数。'; return; }
+        attempts++;
+        if(v===target) log.textContent=`恭喜！猜中 ${target}，共 ${attempts} 次。`;
+        else if(v>target) log.textContent=`太大了！（尝试 ${attempts} 次）`;
+        else log.textContent=`太小了！（尝试 ${attempts} 次）`;
+      });
+      reset.addEventListener('click', newGame);
+    })();
+
+    // ----- 井字棋 -----
+    (function(){
+      const grid = document.getElementById('tttGrid');
+      const status = document.getElementById('tttStatus');
+      const reset = document.getElementById('tttReset');
+      let board, turn, running;
+      function start(){ board = Array(9).fill(''); turn = 'X'; running=true; render(); status.textContent='当前：玩家 '+turn; }
+      function render(){ grid.innerHTML=''; for(let i=0;i<9;i++){ const cell=document.createElement('div'); cell.className='ttt-cell'; cell.dataset.i=i; cell.textContent=board[i]; cell.addEventListener('click', onCell); grid.appendChild(cell);} }
+      function onCell(e){ if(!running) return; const i=+e.currentTarget.dataset.i; if(board[i]) return; board[i]=turn; e.currentTarget.textContent=turn; if(checkWin(turn)){ status.textContent='玩家 '+turn+' 胜利！'; running=false; return;} if(board.every(x=>x)){ status.textContent='平局！'; running=false; return;} turn = turn==='X'?'O':'X'; status.textContent='当前：玩家 '+turn; }
+      function checkWin(p){ const wins=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]]; return wins.some(line=>line.every(i=>board[i]===p)); }
+      reset.addEventListener('click', start); start();
+    })();
+
+    // ----- 记忆翻牌 -----
+    (function(){
+      const icons = ['🍎','🍌','🍇','🍒','🍍','🥝','🍑','🍉'];
+      const grid = document.getElementById('memGrid');
+      const info = document.getElementById('memInfo');
+      const reset = document.getElementById('memReset');
+      let deck, flipped, matches, flips;
+      function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
+      function start(){ deck = shuffle(icons.concat(icons)); flipped=[]; matches=0; flips=0; render(); updateInfo(); }
+      function render(){ grid.innerHTML=''; deck.forEach((c,i)=>{
+        const el=document.createElement('div'); el.className='card-item'; el.dataset.i=i; el.dataset.val=c; el.textContent = flipped.includes(i)||matchesIndices().includes(i)?c:'';
+        el.addEventListener('click', onCard); grid.appendChild(el);
+      }); }
+      function matchesIndices(){ // indices already matched by value occurrences removed from deck? We track matches via matched values
+        const result=[]; // compute indices where card value is matched and both cards matched
+        deck.forEach((v,i)=>{
+          // if value appears once in unmatched? simpler: build map of matched values stored in matchedVals
+        }); return result; }
+      // Simpler approach: when matched, we replace deck positions with null to mark matched
+      function onCard(e){ const i=+e.currentTarget.dataset.i; if(flipped.includes(i) || deck[i]===null) return; flipped.push(i); flips++; render(); updateInfo(); if(flipped.length===2){ const [a,b]=flipped; if(deck[a]===deck[b]){ // match
+            // mark as matched
+            deck[a]=null; deck[b]=null; matches++; setTimeout(()=>{ flipped=[]; render(); updateInfo(); if(matches===8) info.textContent+=' —— 全都找完了！'; },500);
+          } else {
+            setTimeout(()=>{ flipped=[]; render(); updateInfo(); },700);
+          }
+        }
+      }
+      function updateInfo(){ info.textContent=`翻牌次数：${flips}，匹配：${matches}/8`; }
+      reset.addEventListener('click', start); start();
+    })();
+
+    // ----- 灵敏点击 -----
+    (function(){
+      const area = document.getElementById('play-area');
+      const target = document.getElementById('target');
+      const scoreEl = document.getElementById('clickScore');
+      const reset = document.getElementById('clickReset');
+      let score=0, speed=1200, running=true, timer;
+      function place(){ const pad=10; const aw=area.clientWidth, ah=area.clientHeight; const tw=target.offsetWidth, th=target.offsetHeight; const x=Math.random()*(aw-tw-pad*2)+pad; const y=Math.random()*(ah-th-pad*2)+pad; target.style.left = x+'px'; target.style.top = y+'px'; }
+      function tick(){ place(); timer=setTimeout(tick, speed); }
+      target.addEventListener('click', ()=>{ score++; scoreEl.textContent='得分：'+score; // 加快速度
+        speed = Math.max(300, speed - 40); clearTimeout(timer); tick(); });
+      reset.addEventListener('click', ()=>{ score=0; speed=1200; scoreEl.textContent='得分：0'; clearTimeout(timer); tick(); });
+      // start
+      tick();
+      // keep target in right place on resize
+      window.addEventListener('resize', ()=>place());
+    })();
+
   </script>
 </body>
 </html>
